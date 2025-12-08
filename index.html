@@ -1,1 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ahad — Devil Profile</title>
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
+<style>
+:root{
+  --bg:#050405;
+  --card:#0f0f10;
+  --accent:#ff1a1a;
+  --muted:#bdbdbd;
+  --glass: rgba(255,255,255,0.03);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:#eaeaea;background:var(--bg);overflow-x:hidden}
+a{color:var(--accent);text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+.header{
+  padding:18px 12px;
+  display:flex;
+  gap:16px;
+  align-items:center;
+  justify-content:space-between;
+  position:relative;z-index:40
+}
+.brand{display:flex;gap:12px;align-items:center}
+.brand h1{margin:0;font-size:20px;letter-spacing:1px;text-shadow:0 0 8px rgba(255,26,26,0.18)}
+.small{color:var(--muted);font-size:13px}
+.controls{display:flex;gap:8px;align-items:center}
+.icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:inherit;cursor:pointer}
+.toggle{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg, rgba(255,0,0,0.12), rgba(255,0,0,0.05));
+  border:1px solid rgba(255,255,255,0.02)
+}
+
+/* Layout */
+.main{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap:28px;
+  padding:28px 12px;
+  align-items:start;
+  z-index:30;
+  position:relative;
+}
+
+/* Left card */
+.profile-card{
+  background:linear-gradient(180deg, rgba(20,0,0,0.7), rgba(10,0,0,0.6));
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,0,0,0.08);
+  position:relative;
+}
+.profile-pic{
+  width:140px;height:140px;border-radius:18px;overflow:hidden;margin:0 auto;border:4px solid rgba(255,255,255,0.03);
+  background:linear-gradient(180deg, rgba(255,0,0,0.08), rgba(0,0,0,0.25));display:flex;align-items:center;justify-content:center;
+}
+.profile-pic img{width:100%;height:100%;object-fit:cover;display:block}
+.name{margin:14px 0 6px;font-size:22px;letter-spacing:0.6px}
+.location{font-size:13px;color:var(--muted);margin-bottom:12px}
+.bio{font-style:italic;color:#f0e8e8;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);margin-bottom:12px}
+
+/* Buttons */
+.action-list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;justify-content:center;
+  background:linear-gradient(90deg,var(--accent),#c40000);color:white;padding:10px;border-radius:10px;border:0;cursor:pointer;font-weight:600;
+  box-shadow:0 6px 18px rgba(255,26,26,0.12);
+}
+.secondary{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);font-weight:600;padding:10px;border-radius:10px}
+
+/* Right content */
+.content{
+  padding:20px 18px;
+  border-radius:14px;
+  background:linear-gradient(180deg, rgba(15,15,15,0.5), rgba(10,10,10,0.5));
+  border:1px solid rgba(255,0,0,0.04);
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+
+/* Sections */
+.section{margin-bottom:22px}
+.section-title{display:flex;align-items:center;gap:12px;margin-bottom:14px;font-size:18px}
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  padding:14px;border-radius:12px;border:1px solid rgba(255,0,0,0.03)
+}
+
+/* Songs list */
+.songs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.song{
+  display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;background:rgba(0,0,0,0.25);cursor:pointer;border:1px solid rgba(255,0,0,0.04);
+  transition:transform .18s,box-shadow .18s;
+}
+.song:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(255,0,0,0.06)}
+.song img{width:64px;height:64px;border-radius:8px;object-fit:cover}
+.song .meta{font-size:14px}
+.song .meta b{display:block}
+
+/* Gallery placeholder */
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.gallery .tile{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));height:100px;border-radius:8px;border:1px dashed rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px}
+
+/* Footer */
+.footer{color:var(--muted);margin-top:20px;text-align:center;font-size:13px}
+
+/* Typing animation */
+.typewriter {
+  display:inline-block;
+  color:#ffdede;
+  font-weight:600;
+  border-right:2px solid rgba(255,255,255,0.06);
+  white-space:nowrap;
+  overflow:hidden;
+  max-width:100%;
+}
+
+/* Loading overlay (devil eyes) */
+#loadingOverlay{
+  position:fixed;inset:0;background:linear-gradient(180deg,rgba(5,0,0,0.95),rgba(0,0,0,0.95));z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;color:#ffbfbf
+}
+.eyes{width:220px;height:120px;position:relative}
+.eye{
+  position:absolute;left:50%;transform:translateX(-50%);top:20px;width:220px;height:100px;overflow:visible
+}
+.eye .pupil{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:50px;height:50px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #fff 2%, #fff0 8%), #000;border:6px solid var(--accent);box-shadow:0 0 30px rgba(255,26,26,0.6)
+}
+.devil-text{font-size:20px;letter-spacing:1px;text-shadow:0 0 40px rgba(255,0,0,0.18)}
+
+/* Canvas (smoke) positioning */
+#smokeCanvas{
+  position:fixed;left:0;top:0;width:100%;height:100%;z-index:1;pointer-events:none;mix-blend-mode:screen;opacity:0.95
+}
+
+/* Responsive */
+@media (max-width:880px){
+  .main{grid-template-columns:1fr; padding:16px}
+  .profile-card{order:2}
+  .content{order:1}
+  .header{flex-direction:column;align-items:flex-start;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- Smoke canvas -->
+<canvas id="smokeCanvas"></canvas>
+
+<!-- Loading overlay with devil eyes -->
+<div id="loadingOverlay">
+  <div class="eyes" aria-hidden>
+    <div class="eye"><div class="pupil" id="pupil1"></div></div>
+  </div>
+  <div class="devil-text">Enter the Flame...</div>
+</div>
+
+<!-- Page -->
+<div class="container" style="position:relative;z-index:30">
+
+  <header class="header">
+    <div class="brand">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" style="filter:drop-shadow(0 6px 18px rgba(255,26,26,0.08))">
+        <circle cx="12" cy="12" r="10" fill="#140000"/>
+        <path d="M8 9C9.6 7 12 6 12 6s2.4 1 4 3" stroke="#ff1a1a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 16c1.5-1.5 4-1.5 5-1.5s3.5 0 5 1.5" stroke="#ff5555" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <h1>Ahad</h1>
+        <div class="small">Mumbai · Animation designs · Devil-style</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="toggle" id="themeToggle" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="opacity:0.9"><path d="M12 3v2" stroke="#ffb3b3" stroke-width="1.6" stroke-linecap="round"/><path d="M12 19v2" stroke="#ffb3b3" stroke-width="1.6" stroke-linecap="round"/><path d="M4.2 4.2l1.4 1.4" stroke="#ffb3b3" stroke-width="1.6" stroke-linecap="round"/><path d="M18.4 18.4l1.4 1.4" stroke="#ffb3b3" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span style="font-size:13px">Devil Mode</span>
+      </div>
+      <button class="icon-btn" id="openGalleryBtn" title="Open gallery (placeholder)">Gallery</button>
+    </div>
+  </header>
+
+  <main class="main" role="main">
+
+    <!-- LEFT: profile card -->
+    <aside class="profile-card" aria-label="Profile card">
+      <div class="profile-pic" id="profilePicWrap" title="Instagram profile picture (auto fetched)">
+        <!-- img inserted by JS -->
+        <div id="pfplaceholder" style="text-align:center;color:var(--muted);font-size:13px;padding:6px">
+          Loading profile...
+        </div>
+        <input id="uploadInput" type="file" accept="image/*" style="display:none">
+      </div>
+
+      <div style="text-align:center">
+        <div class="name">Ahad</div>
+        <div class="location">Mumbai</div>
+        <div class="bio">
+          <span class="typewriter" id="bioType"></span>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="card" style="padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:13px;color:var(--muted)">Age</div>
+              <div style="font-weight:700">Not Defined</div>
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--muted)">Hobbies</div>
+              <div style="font-weight:700;text-align:right">Developing · Singing · Games</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-list">
+          <a class="btn" href="https://instagram.com/notliear" target="_blank" rel="noopener">Instagram · @notliear</a>
+          <a class="btn" href="https://t.me/noncarder" target="_blank" rel="noopener">Telegram · @noncarder</a>
+          <a class="btn" href="https://wa.me/919762679879" target="_blank" rel="noopener">WhatsApp · +91 97626 79879</a>
+          <button class="secondary" id="uploadBtn">Upload profile pic</button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- RIGHT: content -->
+    <section class="content">
+
+      <!-- About -->
+      <div class="section">
+        <div class="section-title"><strong>About</strong></div>
+        <div class="card" style="padding:14px">
+          <p style="margin:0">
+            <b style="color:#ffb3b3">𝐁ʏ 𝐓ʜɪᴋɪɴɢ 𝐈ᴛ's 𝐍ᴏᴛ 𝐇ᴀᴘᴘᴇɴ !!</b><br>
+            Animation designs · full devil style animations. Creating intense animated looks and motion art.
+          </p>
+        </div>
+      </div>
+
+      <!-- Favorite songs -->
+      <div class="section">
+        <div class="section-title"><strong>Favorite Songs</strong></div>
+        <div class="card">
+          <div class="songs" id="songsList">
+            <!-- Songs inserted by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Gallery -->
+      <div class="section">
+        <div class="section-title"><strong>Gallery</strong> <span style="font-size:13px;color:var(--muted)">(you'll upload later)</span></div>
+        <div class="card gallery" id="galleryPlaceholders">
+          <div class="tile">Upload images later</div>
+          <div class="tile">Upload images later</div>
+          <div class="tile">Upload images later</div>
+          <div class="tile">Upload images later</div>
+        </div>
+      </div>
+
+      <!-- Contact & extras -->
+      <div class="section">
+        <div class="section-title"><strong>Contact</strong></div>
+        <div class="card" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <a class="secondary" href="mailto:ahad@example.com" onclick="event.preventDefault();alert('Replace ahad@example.com with your email in the code if you want mailto to work')">Email (replace)</a>
+          <a class="secondary" href="https://wa.me/919762679879" target="_blank">WhatsApp</a>
+          <a class="secondary" href="https://t.me/noncarder" target="_blank">Telegram</a>
+          <button class="secondary" id="copyLink">Copy profile link</button>
+        </div>
+      </div>
+
+      <div class="footer">© 2025 Ahad · Devil Theme · Built for Vercel</div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- Music player (no autoplay) -->
+<audio id="bgAudio" loop preload="none">
+  <!-- No source: user can replace with their own file in repo or URL.
+       Example: <source src="assets/your-music.mp3" type="audio/mp3"> -->
+</audio>
+<div id="audioControls" style="position:fixed;right:18px;bottom:18px;z-index:50">
+  <button class="btn" id="playBtn" title="Play / Pause background (no autoplay)">▶ Play</button>
+</div>
+
+<script>
+/* ---------- Loading overlay control ---------- */
+const loading = document.getElementById('loadingOverlay');
+window.addEventListener('load', () => {
+  // show a short devil-eyes animation, then hide
+  setTimeout(()=> {
+    loading.style.transition = 'opacity .6s, transform .6s';
+    loading.style.opacity = 0;
+    loading.style.transform = 'scale(0.98)';
+    setTimeout(()=> loading.style.display = 'none', 700);
+  }, 900);
+});
+
+/* ---------- Simple canvas red smoke (particle + gradient) ---------- */
+(() => {
+  const c = document.getElementById('smokeCanvas');
+  const ctx = c.getContext('2d');
+  let W, H, particles = [];
+
+  function resize(){
+    W = c.width = innerWidth;
+    H = c.height = innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function rand(min,max){return Math.random()*(max-min)+min}
+  function createParticle(x,y){
+    return {
+      x: x + rand(-80,80),
+      y: y + rand(-40,40),
+      vx: rand(-0.2,0.2),
+      vy: rand(-0.25,-0.7),
+      life: rand(80,200),
+      r: rand(40,120),
+      t: 0,
+      hue: rand(0,10)
+    }
+  }
+
+  function spawn(){
+    const cx = W*0.5;
+    const cy = H * 0.85;
+    for(let i=0;i<3;i++) particles.push(createParticle(cx + rand(-200,200), cy + rand(-30,30)));
+    if(particles.length>700) particles.splice(0, particles.length-600);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // faint vignette
+    const g = ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0, 'rgba(6,0,0,0.0)');
+    g.addColorStop(1, 'rgba(0,0,0,0.45)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+
+    // particles
+    for(let i=0;i<particles.length;i++){
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx += (Math.sin((p.t/50)+i)*0.0006);
+      p.t++;
+      p.life--;
+      const alpha = Math.max(0, Math.min(1, p.life/160));
+      const rad = p.r * (1 + Math.sin(p.t/30)*0.08);
+      // radial gradient for each particle
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+      grad.addColorStop(0, `rgba(255,80,80,${0.18 * alpha})`);
+      grad.addColorStop(0.4, `rgba(255,26,26,${0.12 * alpha})`);
+      grad.addColorStop(1, `rgba(30,6,6,${0 * alpha})`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, rad, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // overlay subtle red lines
+    ctx.globalCompositeOperation = 'lighter';
+    for(let i=0;i<3;i++){
+      ctx.beginPath();
+      ctx.moveTo(W*0.1 + (i*W*0.2), H*0.95);
+      ctx.quadraticCurveTo(W*0.5, H*0.6 - i*20, W*0.9 - i*W*0.08, H*0.98);
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(255,30,30,0.06)';
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function loop(){
+    spawn();
+    draw();
+    // remove dead
+    particles = particles.filter(p => p.life>0);
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ---------- Typing animation for bio ---------- */
+(function(){
+  const el = document.getElementById('bioType');
+  const text = "𝐁ʏ 𝐓ʜɪᴋɪɴɢ 𝐈ᴛ's 𝐍ᴏᴛ 𝐇ᴀᴘᴘᴇɴ !!  — Animation designs · full devil style animations";
+  let i=0;
+  function step(){
+    el.textContent = text.slice(0,i);
+    i++;
+    if(i<=text.length) setTimeout(step, 40 + Math.random()*35);
+    else {
+      setTimeout(()=> { i=0; el.textContent=''; step(); }, 2500);
+    }
+  }
+  step();
+})();
+
+/* ---------- Songs data (from user). Click opens Telegram bot ---------- */
+const songs = [
+  {title:"Zaroor", artist:"", img:"https://i.postimg.cc/4x6T0tNR/zaroor.jpg"},
+  {title:"Kya Chaiye", artist:"By Aur", img:"https://i.postimg.cc/1tL0ms7Y/kya-chaiye.jpg"},
+  {title:"Long Time To see Taimur Baig", artist:"", img:"https://i.postimg.cc/T3j9mQMj/longtime.jpg"},
+  {title:"Afsos", artist:"", img:"https://i.postimg.cc/2jQ7Wg38/afsos.jpg"},
+  {title:"Phool", artist:"By Aur", img:"https://i.postimg.cc/v87hCkLG/phool.jpg"},
+  {title:"Kya Chaiye (duplicate)", artist:"By Aur", img:"https://i.postimg.cc/1tL0ms7Y/kya-chaiye.jpg"}
+];
+
+const songsList = document.getElementById('songsList');
+songs.forEach(s=>{
+  const div = document.createElement('div');
+  div.className = 'song';
+  div.innerHTML = `<img src="${s.img}" alt="${s.title}"><div class="meta"><b>${s.title}</b><span style="color:var(--muted)">${s.artist}</span></div>`;
+  div.addEventListener('click', ()=> window.open('https://t.me/LizzyMusicBot', '_blank'));
+  songsList.appendChild(div);
+});
+
+/* ---------- Profile pic auto-fetch attempt (graceful fallback) ---------- */
+const instaUser = 'notliear';
+const profileWrap = document.getElementById('profilePicWrap');
+const placeholder = document.getElementById('pfplaceholder');
+const uploadBtn = document.getElementById('uploadBtn');
+const uploadInput = document.getElementById('uploadInput');
+
+function setProfileImage(src){
+  profileWrap.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = src;
+  img.alt = 'Profile';
+  img.loading = 'lazy';
+  profileWrap.appendChild(img);
+}
+
+async function tryFetchInstagram(username){
+  // We'll try two methods; both may fail due to Instagram CORS / rate limits.
+  // If they fail we show fallback and let user upload manually.
+  try {
+    // Method 1: json endpoint (may be blocked)
+    const resp = await fetch(`https://www.instagram.com/${username}/?__a=1`);
+    if(resp.ok){
+      const data = await resp.json();
+      // different edge cases of structure
+      let p = (data?.graphql?.user?.profile_pic_url_hd) || (data?.graphql?.user?.profile_pic_url) || null;
+      if(p){
+        setProfileImage(p);
+        return;
+      }
+    }
+  } catch(e){}
+  try {
+    // Method 2: fetch profile page and parse og:image (may also be blocked)
+    const resp2 = await fetch(`https://r.jina.ai/http://www.instagram.com/${username}`);
+    // NOTE: this uses jina.ai text proxy (public); if it's blocked due to network, fallback
+    if(resp2.ok){
+      const html = await resp2.text();
+      const m = html.match(/property="og:image" content="([^"]+)"/i) || html.match(/"profile_pic_url_hd":"([^"]+)"/i);
+      if(m && m[1]){
+        const url = decodeURIComponent(m[1].replace(/\\u0026/g,'&'));
+        setProfileImage(url);
+        return;
+      }
+    }
+  } catch(e){}
+  // fallback — show manual upload and a default avatar
+  placeholder.innerHTML = '<div style="padding:8px">Cannot fetch Instagram image automatically.<br>Upload or replace later.</div>';
+  profileWrap.style.cursor = 'pointer';
+}
+tryFetchInstagram(instaUser);
+
+/* Manual upload */
+document.getElementById('uploadBtn').addEventListener('click', ()=> uploadInput.click());
+profileWrap.addEventListener('click', ()=> uploadInput.click());
+uploadInput.addEventListener('change', (ev)=>{
+  const f = ev.target.files && ev.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  setProfileImage(url);
+});
+
+/* ---------- Copy profile link (copies site origin or placeholder) ---------- */
+document.getElementById('copyLink').addEventListener('click', ()=>{
+  const link = location.href;
+  navigator.clipboard?.writeText(link).then(()=> alert('Profile link copied to clipboard'), ()=> alert('Unable to copy — manually copy link.'));
+});
+
+/* ---------- Audio controls (NO AUTOPLAY) ---------- */
+const audio = document.getElementById('bgAudio');
+const playBtn = document.getElementById('playBtn');
+let playing = false;
+playBtn.addEventListener('click', ()=>{
+  // If audio has src, toggle. If not, provide hint to add a file.
+  if(!audio.querySelector('source')){
+    alert('No background audio file added. To enable audio, place an .mp3 file in your repo and add a <source> element inside the <audio id="bgAudio"> in the HTML (see comment in code).');
+    return;
+  }
+  if(!playing){ audio.play(); playing = true; playBtn.textContent = '⏸ Pause'; }
+  else { audio.pause(); playing = false; playBtn.textContent = '▶ Play'; }
+});
+
+/* ---------- Small UI helpers ---------- */
+document.getElementById('openGalleryBtn').addEventListener('click', ()=> {
+  window.scrollTo({top: document.getElementById('galleryPlaceholders').offsetTop-60, behavior:'smooth'});
+});
+
+/* ---------- Devil-mode visual tweak (toggle) ---------- */
+document.getElementById('themeToggle').addEventListener('click', function(){
+  // small pulse effect
+  this.style.transform = 'scale(0.98)';
+  setTimeout(()=> this.style.transform = '', 150);
+  // flash animation: increase smoke intensity by adding particles (simulated)
+  // We'll create a brief red flash by overlaying a radial gradient
+  const overlay = document.createElement('div');
+  overlay.style.position='fixed';overlay.style.inset=0;overlay.style.zIndex=9998;overlay.style.pointerEvents='none';
+  overlay.style.background='radial-gradient(circle at 50% 40%, rgba(255,0,0,0.08), rgba(0,0,0,0.0))';
+  document.body.appendChild(overlay);
+  setTimeout(()=> overlay.remove(), 400);
+});
+
+/* ---------- Make pupils follow mouse for effect ---------- */
+(function(){
+  const p = document.getElementById('pupil1');
+  if(!p) return;
+  document.addEventListener('mousemove', (e)=>{
+    const rect = p.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    const dx = (e.clientX - cx)/40;
+    const dy = (e.clientY - cy)/40;
+    p.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  });
+})();
+
+/* ---------- Accessibility: prefer-reduced-motion respects ---------- */
+const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(prefersReduced){
+  document.querySelectorAll('*').forEach(el=>{
+    el.style.transition = 'none';
+    el.style.animation = 'none';
+  });
+}
+</script>
+</body>
+</html>
