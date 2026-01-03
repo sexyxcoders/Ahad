@@ -1,1 +1,214 @@
-web: node server.js
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Encode & Decode Tool — Modern App UI</title>
+
+<style>
+body {margin:0;font-family:Inter,sans-serif;background:#f5f7fa;color:#111;}
+header {background:#1a73e8;padding:16px;text-align:center;color:#fff;font-size:20px;font-weight:600;}
+.container {padding:16px;padding-bottom:160px;}
+.card {background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 5px rgba(0,0,0,0.08);margin-bottom:16px;}
+.mode-switch {display:flex;gap:10px;margin-bottom:12px;}
+.mode-btn {flex:1;padding:12px;border-radius:8px;border:1px solid #d0d7de;background:#fff;cursor:pointer;font-size:14px;}
+.mode-btn.active {background:#1a73e8;color:#fff;border-color:#1a73e8;}
+.tabs {display:flex;overflow-x:auto;gap:10px;padding-bottom:8px;}
+.tab-btn {padding:10px 14px;background:#e9eef3;border-radius:20px;border:none;white-space:nowrap;cursor:pointer;}
+.tab-btn.active {background:#1a73e8;color:#fff;}
+textarea {width:100%;min-height:160px;border-radius:10px;border:1px solid #d0d7de;padding:12px;font-size:14px;box-sizing:border-box;}
+.btn {padding:12px;border-radius:8px;border:none;background:#1a73e8;color:#fff;font-weight:600;width:100%;margin-top:12px;font-size:15px;cursor:pointer;}
+.btn.secondary {background:#e4e7eb;color:#333;font-weight:500;}
+.bottom-nav {position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #d8d8d8;display:flex;justify-content:space-around;padding:12px 0;}
+.bottom-nav button {background:none;border:none;color:#1a73e8;font-size:15px;font-weight:600;cursor:pointer;}
+.toast {position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:12px 18px;border-radius:8px;opacity:0;transition:0.3s ease;}
+.toast.show {opacity:1;}
+footer {text-align:center;padding:12px 0;color:#555;font-size:14px;}
+footer a {color:#1a73e8;text-decoration:none;margin:0 6px;}
+label{font-weight:600;}
+</style>
+</head>
+
+<body>
+
+<header>Encode & Decode Tool</header>
+
+<div class="container">
+
+  <!-- Mode -->
+  <div class="card mode-switch">
+    <button id="modeEncode" class="mode-btn active">Encode</button>
+    <button id="modeDecode" class="mode-btn">Decode</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="card tabs">
+    <button class="tab-btn active" data-method="base64">Base64</button>
+    <button class="tab-btn" data-method="url">URL</button>
+    <button class="tab-btn" data-method="hex">Hex</button>
+    <button class="tab-btn" data-method="xescape">\xNN Escape</button>
+    <button class="tab-btn" data-method="rot13">ROT13</button>
+    <button class="tab-btn" data-method="utf8">UTF-8</button>
+    <button class="tab-btn" data-method="binary">Binary</button>
+    <button class="tab-btn" data-method="base32">Base32</button>
+    <button class="tab-btn" data-method="base58">Base58</button>
+    <button class="tab-btn" data-method="base62">Base62</button>
+    <button class="tab-btn" data-method="base91">Base91</button>
+    <button class="tab-btn" data-method="morse">Morse</button>
+    <button class="tab-btn" data-method="caesar">Caesar</button>
+    <button class="tab-btn" data-method="hash">Hash</button>
+  </div>
+
+  <!-- Input -->
+  <div class="card">
+    <label>Input</label>
+    <textarea id="input" placeholder="Enter text here..."></textarea>
+    <button id="run" class="btn">Run</button>
+    <div id="caesarKeyContainer" style="margin-top:10px; display:none;">
+      <label>Caesar Shift: <span id="caesarVal">3</span></label>
+      <input type="range" id="caesarKey" min="1" max="25" value="3">
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="card">
+    <label>Output</label>
+    <textarea id="output" readonly placeholder="Output appears here..."></textarea>
+    <button id="copyOut" class="btn secondary">Copy</button>
+    <button id="downloadOut" class="btn secondary">Download</button>
+    <button id="shareOut" class="btn secondary">Share</button>
+  </div>
+
+  <!-- Support Info -->
+  <div class="card" style="text-align:center;">
+    <strong>Support & Credits</strong><br>
+    <a href="https://t.me/NexaCoders" target="_blank">Support Channel</a> | 
+    <a href="https://t.me/NexaMeetup" target="_blank">Support Chat</a><br>
+    Made by <strong>@noncarder</strong>
+  </div>
+
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button id="clearAll">Clear</button>
+  <button id="swapBtn">Swap</button>
+  <button id="exampleBtn">Example</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ------------------ ENCODERS/DECODERS ------------------ */
+const BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+const MORSE = {
+  "A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---",
+  "K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-",
+  "U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..",
+  "0":"-----","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----.",
+  " ":"/"
+};
+
+function encodeBase64(t){return btoa(unescape(encodeURIComponent(t))); }
+function decodeBase64(t){try{return decodeURIComponent(escape(atob(t)));}catch(e){return null;}}
+
+function encodeURL(t){ return encodeURIComponent(t); }
+function decodeURL(t){ try{return decodeURIComponent(t);}catch(e){return null;} }
+
+function encodeHex(t){ return [...t].map(c=>"\\x"+c.charCodeAt(0).toString(16).padStart(2,"0")).join(""); }
+function decodeHex(t){return t.replace(/\\x([0-9A-Fa-f]{2})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));}
+
+function decodeXEscape(t){return decodeHex(t);}
+function encodeXEscape(t){return encodeHex(t);}
+
+function rot13(t){return t.replace(/[a-zA-Z]/g,c=>String.fromCharCode((c<="Z"?90:122)>=(c=c.charCodeAt(0)+13)?c:c-26));}
+
+function encodeUTF8(t){ return new TextEncoder().encode(t).join(" "); }
+function decodeUTF8(t){return new TextDecoder().decode(new Uint8Array(t.split(" ").map(Number)));}
+
+function encodeBinary(t){return [...t].map(c=>c.charCodeAt(0).toString(2).padStart(8,"0")).join(" "); }
+function decodeBinary(t){return String.fromCharCode(...t.split(" ").map(b=>parseInt(b,2))); }
+
+function encodeBase32(t){ return [...t].map(c=>BASE32_ALPHABET[c.charCodeAt(0)%32]).join(""); }
+function decodeBase32(t){return t.split("").map(c=>String.fromCharCode(BASE32_ALPHABET.indexOf(c))).join(""); }
+
+function encodeBase58(t){return [...t].map(c=>BASE58_ALPHABET[c.charCodeAt(0)%58]).join("");}
+function decodeBase58(t){return [...t].map(c=>String.fromCharCode(BASE58_ALPHABET.indexOf(c))).join("");}
+
+function encodeBase62(t){return [...t].map(c=>BASE62_ALPHABET[c.charCodeAt(0)%62]).join("");}
+function decodeBase62(t){return [...t].map(c=>String.fromCharCode(BASE62_ALPHABET.indexOf(c))).join("");}
+
+function encodeBase91(t){return [...t].map(c=>c.charCodeAt(0)+33).map(n=>String.fromCharCode(n)).join("");}
+function decodeBase91(t){return [...t].map(c=>String.fromCharCode(c.charCodeAt(0)-33)).join("");}
+
+function encodeMorse(t){return [...t.toUpperCase()].map(c=>MORSE[c]||"?").join(" ");}
+function decodeMorse(t){let inv={};for(let k in MORSE) inv[MORSE[k]]=k;return t.split(" ").map(c=>inv[c]||"?").join("");}
+
+function encodeCaesar(t, key){return t.replace(/[a-zA-Z]/g,c=>String.fromCharCode((c<="Z"?65:97)+((c.charCodeAt(0)+(key))-(c<="Z"?65:97))%26));}
+function decodeCaesar(t,key){return t.replace(/[a-zA-Z]/g,c=>String.fromCharCode((c<="Z"?65:97)+((c.charCodeAt(0)-(key)+(26))-(c<="Z"?65:97))%26));}
+
+async function encodeHash(t, algo="SHA-256"){ 
+  const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(t));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+/* ------------------ UI HANDLERS ------------------ */
+let currentMode="encode", method="base64";
+
+document.querySelectorAll(".mode-btn").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentMode = btn.id==="modeEncode"?"encode":"decode";
+    document.getElementById("caesarKeyContainer").style.display=(method==="caesar")?"block":"none";
+  };
+});
+
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    method = btn.dataset.method;
+    document.getElementById("caesarKeyContainer").style.display=(method==="caesar")?"block":"none";
+  };
+});
+
+function toast(msg){let t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500);}
+
+document.getElementById("caesarKey").oninput=function(){document.getElementById("caesarVal").textContent=this.value;}
+
+document.getElementById("run").onclick=async()=>{
+  let input=document.getElementById("input").value;
+  let out="";
+  try{
+    if(method==="base64") out=currentMode==="encode"?encodeBase64(input):decodeBase64(input);
+    else if(method==="url") out=currentMode==="encode"?encodeURL(input):decodeURL(input);
+    else if(method==="hex") out=currentMode==="encode"?encodeHex(input):decodeHex(input);
+    else if(method==="xescape") out=currentMode==="encode"?encodeXEscape(input):decodeXEscape(input);
+    else if(method==="rot13") out=rot13(input);
+    else if(method==="utf8") out=currentMode==="encode"?encodeUTF8(input):decodeUTF8(input);
+    else if(method==="binary") out=currentMode==="encode"?encodeBinary(input):decodeBinary(input);
+    else if(method==="base32") out=currentMode==="encode"?encodeBase32(input):decodeBase32(input);
+    else if(method==="base58") out=currentMode==="encode"?encodeBase58(input):decodeBase58(input);
+    else if(method==="base62") out=currentMode==="encode"?encodeBase62(input):decodeBase62(input);
+    else if(method==="base91") out=currentMode==="encode"?encodeBase91(input):decodeBase91(input);
+    else if(method==="morse") out=currentMode==="encode"?encodeMorse(input):decodeMorse(input);
+    else if(method==="caesar") out=currentMode==="encode"?encodeCaesar(input,Number(document.getElementById("caesarKey").value)):decodeCaesar(input,Number(document.getElementById("caesarKey").value));
+    else if(method==="hash") out=await encodeHash(input,"SHA-256");
+  }catch(e){out="Error: Invalid input";}
+  document.getElementById("output").value=out;
+};
+
+/* ------------------ Bottom Buttons ------------------ */
+document.getElementById("copyOut").onclick=()=>{navigator.clipboard.writeText(document.getElementById("output").value);toast("Copied");};
+document.getElementById("downloadOut").onclick=()=>{let blob=new Blob([document.getElementById("output").value], {type:"text/plain"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="output.txt";a.click();};
+document.getElementById("shareOut").onclick=()=>{if(navigator.share){navigator.share({text:document.getElementById("output").value});}else{toast("Sharing not supported");}};
+document.getElementById("swapBtn").onclick=()=>{let i=document.getElementById("input"), o=document.getElementById("output"), temp=i.value;i.value=o.value;o.value=temp;};
+document.getElementById("clearAll").onclick=()=>{document.getElementById("input").value="";document.getElementById("output").value="";toast("Cleared");};
+document.getElementById("exampleBtn").onclick=()=>{document.getElementById("input").value="Hello World";toast("Example inserted");};
+</script>
+
+</body>
+</html>
